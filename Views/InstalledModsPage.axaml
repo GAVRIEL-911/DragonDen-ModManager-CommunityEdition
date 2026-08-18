@@ -1,0 +1,575 @@
+﻿<UserControl
+    x:Class="DragonDen.ModManager.Views.InstalledModsPage"
+    xmlns="https://github.com/avaloniaui"
+    xmlns:services="clr-namespace:DragonDen.ModManager.Services"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:svc="clr-namespace:DragonDen.ModManager.Services"
+    xmlns:viewModels="clr-namespace:DragonDen.ModManager.ViewModels"
+    mc:Ignorable="d"
+    Focusable="True">
+
+    <UserControl.Resources>
+        <services:LocKeyConverter x:Key="LocKey" />
+        <svc:StringHasTextConverter x:Key="StringHasTextConverter" />
+        <svc:VersionChangeEnabledConverter x:Key="VersionDiffEnabled" />
+        <svc:VersionLabelConverter x:Key="VersionLabelConverter" />
+        <svc:BoolNotConverter x:Key="Not" />
+        <svc:StringEqualsConverter x:Key="Eq" />
+        <svc:StringNotEqualsConverter x:Key="Neq" />
+        <svc:CollectionHasItemsConverter x:Key="HasItems" />
+        <svc:ShowCustomInstallConverter x:Key="ShowCustom" />
+        <svc:BoolAndConverter x:Key="And" />
+
+        <SolidColorBrush x:Key="Dd.Background" Color="#0F1317" />
+        <SolidColorBrush x:Key="Dd.Panel" Color="#12161A" />
+        <SolidColorBrush x:Key="Dd.Card" Color="#1B1F24" />
+        <SolidColorBrush x:Key="Dd.Card.Hover" Color="#21262C" />
+        <SolidColorBrush x:Key="Dd.Border" Color="#2A2A2A" />
+        <SolidColorBrush x:Key="Dd.Subtle" Color="#99FFFFFF" />
+        <SolidColorBrush x:Key="Dd.Text" Color="#FF8A00" />
+
+        <SolidColorBrush x:Key="Dd.Orange" Color="#FF8A00" />
+        <SolidColorBrush x:Key="Dd.Orange.Hover" Color="#FFA333" />
+
+        <SolidColorBrush x:Key="Dd.DarkOrange" Color="#cc6e00" />
+        <SolidColorBrush x:Key="Dd.DarkOrange.Hover" Color="#d67300" />
+
+        <SolidColorBrush x:Key="Dd.Green" Color="#1faa33" />
+        <SolidColorBrush x:Key="Dd.Green.Hover" Color="#2ad643" />
+
+        <SolidColorBrush x:Key="Dd.Red" Color="#d40404" />
+        <SolidColorBrush x:Key="Dd.Red.Hover" Color="#fc2626" />
+
+        <SolidColorBrush x:Key="Dd.Black" Color="#111111" />
+        <SolidColorBrush x:Key="Dd.Black.Hover" Color="#222222" />
+
+        <SolidColorBrush x:Key="Dd.Btn" Color="#2A2F36" />
+        <SolidColorBrush x:Key="Dd.Btn.Hover" Color="#FF8A00" />
+        <SolidColorBrush x:Key="Dd.Btn.Fg" Color="#EDEDED" />
+        <SolidColorBrush x:Key="Dd.Btn.HoverFg" Color="#111111" />
+
+        <LinearGradientBrush x:Key="Dd.RedGrad" StartPoint="0,0" EndPoint="1,1">
+            <GradientStop Offset="0" Color="#fc2626" />
+            <GradientStop Offset="1" Color="#d40404" />
+        </LinearGradientBrush>
+
+        <LinearGradientBrush x:Key="Dd.OrangeGrad" StartPoint="0,0" EndPoint="1,1">
+            <GradientStop Offset="0" Color="#FF8A00" />
+            <GradientStop Offset="1" Color="#FFA333" />
+        </LinearGradientBrush>
+    </UserControl.Resources>
+
+    <UserControl.Styles>
+        <Style Selector="Border.card">
+            <Setter Property="Background" Value="{StaticResource Dd.Card}" />
+            <Setter Property="CornerRadius" Value="14" />
+            <Setter Property="Padding" Value="12" />
+            <Setter Property="Margin" Value="5" />
+            <Setter Property="BorderBrush" Value="{StaticResource Dd.Border}" />
+            <Setter Property="BorderThickness" Value="1" />
+            <Setter Property="MinHeight" Value="160" />
+            <Setter Property="ClipToBounds" Value="True" />
+        </Style>
+        <Style Selector="Border.card:pointerover">
+            <Setter Property="Background" Value="{StaticResource Dd.Card.Hover}" />
+        </Style>
+
+        <Style Selector="Border.pill">
+            <Setter Property="Background" Value="#262626" />
+            <Setter Property="CornerRadius" Value="10" />
+            <Setter Property="Padding" Value="6,1" />
+            <Setter Property="MinHeight" Value="20" />
+            <Setter Property="VerticalAlignment" Value="Center" />
+            <Setter Property="BorderBrush" Value="{StaticResource Dd.Border}" />
+            <Setter Property="BorderThickness" Value="1" />
+            <Setter Property="Margin" Value="0,0,6,0" />
+        </Style>
+
+        <Style Selector="Button.owner-pill">
+            <Setter Property="CornerRadius" Value="10" />
+            <Setter Property="Padding" Value="4,1" />
+            <Setter Property="Margin" Value="0,0,6,0" />
+            <Setter Property="FontSize" Value="12" />
+            <Setter Property="MinHeight" Value="20" />
+            <Setter Property="FontWeight" Value="DemiBold" />
+            <Setter Property="VerticalAlignment" Value="Center" />
+            <Setter Property="Background" Value="{StaticResource Dd.Orange}" />
+            <Setter Property="Foreground" Value="#111111" />
+            <Setter Property="Cursor" Value="Hand" />
+        </Style>
+        <Style Selector="Button.owner-pill:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+            <Setter Property="Background" Value="{StaticResource Dd.Orange.Hover}" />
+            <Setter Property="FontWeight" Value="DemiBold" />
+        </Style>
+
+        <Style Selector="Button.btn">
+            <Setter Property="Background" Value="{StaticResource Dd.Btn}" />
+            <Setter Property="Foreground" Value="{StaticResource Dd.Btn.Fg}" />
+            <Setter Property="BorderBrush" Value="{StaticResource Dd.Border}" />
+            <Setter Property="BorderThickness" Value="1" />
+            <Setter Property="CornerRadius" Value="8" />
+            <Setter Property="Padding" Value="8,6" />
+            <Setter Property="MinWidth" Value="84" />
+            <Setter Property="HorizontalContentAlignment" Value="Center"/>
+        </Style>
+        <Style Selector="Button.btn:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+            <Setter Property="Background" Value="{StaticResource Dd.Btn.Hover}" />
+            <Setter Property="Foreground" Value="{StaticResource Dd.Btn.HoverFg}" />
+        </Style>
+        <Style Selector="Button.btn-danger">
+            <Setter Property="Background" Value="{StaticResource Dd.Red}" />
+            <Setter Property="Foreground" Value="#0C1116" />
+            <Setter Property="FontWeight" Value="DemiBold" />
+        </Style>
+        <Style Selector="Button.btn-danger:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+            <Setter Property="Background" Value="{StaticResource Dd.Red.Hover}" />
+        </Style>
+        <Style Selector="Button.btn-neutral">
+            <Setter Property="Background" Value="{StaticResource Dd.Btn}" />
+            <Setter Property="Foreground" Value="{StaticResource Dd.Btn.Fg}" />
+        </Style>
+        <Style Selector="Button.btn-green">
+            <Setter Property="Background" Value="{StaticResource Dd.Green}" />
+            <Setter Property="Foreground" Value="{StaticResource Dd.Black}" />
+        </Style>
+
+        <Style Selector="TextBlock.h2">
+            <Setter Property="FontSize" Value="25" />
+            <Setter Property="FontWeight" Value="SemiBold" />
+            <Setter Property="Foreground" Value="{StaticResource Dd.Text}" />
+        </Style>
+
+        <Style Selector="Button.mod-title">
+            <Setter Property="Background" Value="Transparent" />
+            <Setter Property="BorderBrush" Value="Transparent" />
+            <Setter Property="Foreground" Value="{DynamicResource TextBrush}" />
+            <Setter Property="Padding" Value="0" />
+            <Setter Property="CornerRadius" Value="0" />
+            <Setter Property="Cursor" Value="Hand" />
+            <Setter Property="MinHeight" Value="0" />
+        </Style>
+        <Style Selector="Button.mod-title /template/ ContentPresenter#PART_ContentPresenter">
+            <Setter Property="Background" Value="Transparent" />
+        </Style>
+        <Style Selector="Button.mod-title:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+            <Setter Property="Foreground" Value="#FF8A00" />
+        </Style>
+
+        <Style Selector="Button.guid-pill">
+            <Setter Property="Padding" Value="6,2" />
+            <Setter Property="CornerRadius" Value="6" />
+            <Setter Property="Background" Value="#262A30" />
+            <Setter Property="Foreground" Value="#B7BDC7" />
+            <Setter Property="BorderBrush" Value="{StaticResource Dd.Border}" />
+            <Setter Property="BorderThickness" Value="1" />
+            <Setter Property="FontSize" Value="12" />
+            <Setter Property="MinHeight" Value="22" />
+            <Setter Property="Cursor" Value="Hand" />
+            <Setter Property="HorizontalAlignment" Value="Left" />
+        </Style>
+        <Style Selector="Button.guid-pill:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+            <Setter Property="Background" Value="#262A30" />
+            <Setter Property="Foreground" Value="#B7BDC7" />
+        </Style>
+
+        <Style Selector="Button.update-badge">
+            <Setter Property="Background" Value="{StaticResource Dd.OrangeGrad}" />
+            <Setter Property="Foreground" Value="{StaticResource Dd.Black}" />
+            <Setter Property="Padding" Value="8,2" />
+            <Setter Property="CornerRadius" Value="10" />
+            <Setter Property="FontWeight" Value="Bold" />
+            <Setter Property="MinHeight" Value="22" />
+            <Setter Property="HorizontalAlignment" Value="Left" />
+            <Setter Property="VerticalAlignment" Value="Top" />
+            <Setter Property="Margin" Value="6" />
+        </Style>
+
+        <Style Selector="Button.update-badge:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+            <Setter Property="Background" Value="{StaticResource Dd.OrangeGrad}" />
+            <Setter Property="Foreground" Value="{StaticResource Dd.Black}" />
+        </Style>
+
+        <Style Selector="Button.btn-trash">
+            <Setter Property="Background" Value="Transparent" />
+            <Setter Property="BorderBrush" Value="Transparent" />
+            <Setter Property="Foreground" Value="Red" />
+            <Setter Property="Padding" Value="4" />
+            <Setter Property="FontSize" Value="16" />
+            <Setter Property="Cursor" Value="Hand" />
+        </Style>
+        <Style Selector="Button.btn-trash:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+            <Setter Property="Foreground" Value="#ffffff" />
+        </Style>
+
+        <Style Selector="#ModsList ListBoxItem">
+            <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+            <Setter Property="Padding" Value="0" />
+            <Setter Property="Margin" Value="0,2" />
+        </Style>
+        <Style Selector="#ModsList ListBoxItem:selected /template/ ContentPresenter#PART_ContentPresenter">
+            <Setter Property="Background" Value="Transparent" />
+            <Setter Property="BorderBrush" Value="Transparent" />
+        </Style>
+        <Style Selector="#ModsList ListBoxItem:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+            <Setter Property="Background" Value="Transparent" />
+        </Style>
+        <Style Selector="#ModsList ListBoxItem:focus /template/ ContentPresenter#PART_ContentPresenter">
+            <Setter Property="BorderBrush" Value="Transparent" />
+        </Style>
+    </UserControl.Styles>
+
+    <Grid Background="{StaticResource Dd.Background}">
+        <Grid x:Name="MainContent" RowDefinitions="Auto,Auto,*">
+            <Border Background="{StaticResource Dd.Panel}" Padding="10" Grid.Row="0"
+                    BorderBrush="{StaticResource Dd.Border}" BorderThickness="0,0,0,1">
+                <DockPanel LastChildFill="True">
+                    <WrapPanel Orientation="Horizontal" Margin="8" DockPanel.Dock="Left" VerticalAlignment="Center">
+                        <StackPanel Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
+                            <Button x:Name="RefreshBtn" Content="{ReflectionBinding Converter={StaticResource LocKey}, ConverterParameter=Common.Refresh}" Classes="btn btn-neutral" />
+                            <!--<Button x:Name="UpdateAllBtn" FontWeight="DemiBold" Content="Update All" Classes="btn btn-green" />-->
+                        </StackPanel>
+                        <Border Width="1" Height="28" Background="{StaticResource Dd.Border}" Margin="4,0" />
+                        <StackPanel Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
+                            <Button x:Name="EnableAllBtn" FontWeight="DemiBold" Content="{ReflectionBinding Converter={StaticResource LocKey}, ConverterParameter=Installed.EnableAll}" Classes="btn btn-green" />
+                            <Button x:Name="DisableAllBtn" FontWeight="DemiBold" Content="{ReflectionBinding Converter={StaticResource LocKey}, ConverterParameter=Installed.DisableAll}" Classes="btn btn-danger" />
+                        </StackPanel>
+                        <Border Width="1" Height="28" Background="{StaticResource Dd.Border}" Margin="4,0" />
+                        <StackPanel Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
+                            <Button x:Name="OpenClientBtn" Content="{ReflectionBinding Converter={StaticResource LocKey}, ConverterParameter=Installed.ClientFolder}" Classes="btn btn-neutral" />
+                            <Button x:Name="OpenServerBtn" Content="{ReflectionBinding Converter={StaticResource LocKey}, ConverterParameter=Installed.ServerFolder}" Classes="btn btn-neutral" />
+                            <Button x:Name="UninstallAllBtn" Content="{ReflectionBinding Converter={StaticResource LocKey}, ConverterParameter=Installed.UninstallAll}" Classes="btn btn-danger" />
+                        </StackPanel>
+                    </WrapPanel>
+
+                    <TextBlock x:Name="StatusText"
+                               Margin="10,0,0,0"
+                               DockPanel.Dock="Right"
+                               VerticalAlignment="Center"
+                               Foreground="{StaticResource Dd.Subtle}" />
+                </DockPanel>
+            </Border>
+
+            <Border Background="{StaticResource Dd.Panel}" Padding="10" Grid.Row="1"
+                    BorderBrush="{StaticResource Dd.Border}" BorderThickness="0,0,0,1">
+                <DockPanel LastChildFill="True">
+                    <StackPanel Orientation="Horizontal" Spacing="10" DockPanel.Dock="Left">
+                        <TextBox x:Name="SearchBox" Width="440" Watermark="{ReflectionBinding Converter={StaticResource LocKey}, ConverterParameter=Common.Search}" />
+                        <Button x:Name="ClearBtn" Content="{ReflectionBinding Converter={StaticResource LocKey}, ConverterParameter=Common.Clear}" Classes="btn btn-neutral" />
+                        <ComboBox x:Name="SortBox" Width="220" SelectedIndex="0">
+                            <ComboBoxItem Content="{ReflectionBinding Converter={StaticResource LocKey}, ConverterParameter=Installed.SortAlpha}" Tag="alpha" />
+                            <ComboBoxItem Content="{ReflectionBinding Converter={StaticResource LocKey}, ConverterParameter=Installed.SortNewest}" Tag="installed_desc" />
+                            <ComboBoxItem Content="{ReflectionBinding Converter={StaticResource LocKey}, ConverterParameter=Installed.SortOldest}" Tag="installed_asc" />
+                            <ComboBoxItem Content="{ReflectionBinding Converter={StaticResource LocKey}, ConverterParameter=Installed.SortEnabled}" Tag="enabled_first" />
+                            <ComboBoxItem Content="{ReflectionBinding Converter={StaticResource LocKey}, ConverterParameter=Installed.SortDisabled}" Tag="enabled_last" />
+                        </ComboBox>
+                        <CheckBox x:Name="UpdatesFirstChk" Content="{ReflectionBinding Converter={StaticResource LocKey}, ConverterParameter=Installed.SortUpdates}" IsChecked="True" />
+                        <CheckBox x:Name="HideDisabledChk" Content="{ReflectionBinding Converter={StaticResource LocKey}, ConverterParameter=Installed.HideDisabled}" IsChecked="False" />
+                    </StackPanel>
+                </DockPanel>
+            </Border>
+
+            <ScrollViewer x:Name="ModsScroll" Grid.Row="2" HorizontalScrollBarVisibility="Disabled">
+                <ListBox x:Name="ModsList" Background="Transparent" BorderBrush="Transparent">
+                    <ListBox.ItemsPanel>
+                        <ItemsPanelTemplate>
+                            <WrapPanel HorizontalAlignment="Center" Orientation="Horizontal" />
+                        </ItemsPanelTemplate>
+                    </ListBox.ItemsPanel>
+
+                    <ListBox.ItemTemplate>
+                        <DataTemplate x:DataType="viewModels:InstalledModRow">
+                            <Border Classes="card" MinWidth="400" MaxWidth="400">
+                                <Grid RowDefinitions="Auto,*,Auto" ColumnDefinitions="120,*,30">
+                                    <Border Grid.Row="0" Grid.ColumnSpan="3" Background="Transparent" Padding="1,-10,0,0">
+                                        <DockPanel>
+                                            <Button Classes="mod-title"
+                                                    IsEnabled="{Binding HasPage}"
+                                                    Tag="{Binding DetailUrl}"
+                                                    Click="OnOpenPageFromTitle">
+                                                <TextBlock Text="{Binding Name}" FontSize="16" FontWeight="Bold"
+                                                           TextWrapping="Wrap" MaxLines="2" TextTrimming="CharacterEllipsis" />
+                                            </Button>
+
+                                            <StackPanel Margin="0,0,-10,0" HorizontalAlignment="Right" VerticalAlignment="Top">
+                                                <StackPanel.IsVisible>
+                                                    <MultiBinding Converter="{StaticResource ShowCustom}" ConverterParameter="invert">
+                                                        <Binding Path="InstalledVersion"/>
+                                                        <Binding Path="Versions"/>
+                                                    </MultiBinding>
+                                                </StackPanel.IsVisible>
+
+                                                <CheckBox
+                                                    Tag="{Binding .}"
+                                                    IsChecked="{Binding IsDisabled, Converter={StaticResource Not}}"
+                                                    ToolTip.Tip="Toggle enable/disable"
+                                                    Click="OnToggleEnabled">
+                                                    <CheckBox.Styles>
+                                                        <Style Selector="CheckBox /template/ Border#PART_Root">
+                                                            <Setter Property="Background" Value="#AA111111" />
+                                                            <Setter Property="CornerRadius" Value="6" />
+                                                            <Setter Property="Padding" Value="6,2" />
+                                                        </Style>
+                                                    </CheckBox.Styles>
+                                                </CheckBox>
+                                            </StackPanel>
+                                        </DockPanel>
+                                    </Border>
+
+                                    <StackPanel Grid.Row="1" Grid.Column="0" Spacing="6">
+                                        <Border x:Name="Thumbnail" Width="120" Height="120"
+                                                CornerRadius="15"
+                                                Background="#101418"
+                                                BorderBrush="{StaticResource Dd.Border}" BorderThickness="1"
+                                                ClipToBounds="True">
+                                            <Grid>
+                                                <svc:WebImage Url="{Binding Thumbnail}" Stretch="UniformToFill" />
+                                                <Border HorizontalAlignment="Center" VerticalAlignment="Bottom"
+                                                        Margin="0,1,0,0" Padding="10,2"
+                                                        CornerRadius="8"
+                                                        Background="{StaticResource Dd.Border}"
+                                                        ToolTip.Tip="This mod is disabled, toggle checkmark to enable.">
+                                                    <Border.IsVisible>
+                                                        <MultiBinding Converter="{StaticResource And}">
+                                                            <Binding Path="IsDisabled"/>
+                                                            <MultiBinding Converter="{StaticResource ShowCustom}" ConverterParameter="invert">
+                                                                <Binding Path="InstalledVersion"/>
+                                                                <Binding Path="Versions"/>
+                                                            </MultiBinding>
+                                                        </MultiBinding>
+                                                    </Border.IsVisible>
+                                                    <TextBlock Text="{ReflectionBinding Converter={StaticResource LocKey}, ConverterParameter=Installed.ModDisabled}" FontWeight="Bold" HorizontalAlignment="Center" Foreground="{StaticResource Dd.DarkOrange}" />
+                                                </Border>
+
+                                                <Border HorizontalAlignment="Center" VerticalAlignment="Bottom"
+                                                        Margin="0,1,0,0" Padding="7,2"
+                                                        CornerRadius="8"
+                                                        ToolTip.Tip="This mod was not installed with Mod Manager"
+                                                        Background="{StaticResource Dd.Red}">
+                                                    <Border.IsVisible>
+                                                        <MultiBinding Converter="{StaticResource ShowCustom}">
+                                                            <Binding Path="InstalledVersion"/>
+                                                            <Binding Path="Versions"/>
+                                                        </MultiBinding>
+                                                    </Border.IsVisible>
+                                                    <TextBlock Text="{ReflectionBinding Converter={StaticResource LocKey}, ConverterParameter=Installed.NotSupported}" FontWeight="Bold" Foreground="{StaticResource Dd.Black}" />
+                                                </Border>
+
+                                                <Button Classes="update-badge"
+                                                        Margin="1,0,0,0" Padding="8,2"
+                                                        Width="110" Height="10"
+                                                        HorizontalContentAlignment="Center"
+                                                        CornerRadius="8"
+                                                        Content="{ReflectionBinding Converter={StaticResource LocKey}, ConverterParameter=Installed.UpdateMod}"
+                                                        Background="{StaticResource Dd.Orange}"
+                                                        Tag="{Binding .}"
+                                                        Click="OnUpdateFromBadge"
+                                                        ToolTip.Tip="Click to update to latest version."
+                                                        IsEnabled="{Binding IsDisabled, Converter={StaticResource Not}}">
+                                                    <Button.IsVisible>
+                                                        <MultiBinding Converter="{StaticResource And}">
+                                                            <Binding Path="IsOutdated"/>
+                                                            <Binding Path="IsDisabled" Converter="{StaticResource Not}"/>
+                                                            <MultiBinding Converter="{StaticResource ShowCustom}" ConverterParameter="invert">
+                                                                <Binding Path="InstalledVersion"/>
+                                                                <Binding Path="Versions"/>
+                                                            </MultiBinding>
+                                                        </MultiBinding>
+                                                    </Button.IsVisible>
+                                                </Button>
+                                            </Grid>
+                                        </Border>
+
+                                        <Button Content="{ReflectionBinding Converter={StaticResource LocKey}, ConverterParameter=Installed.ChangeVersion}"
+                                                FontSize="13"
+                                                Classes="btn btn-neutral"
+                                                Tag="{Binding .}"
+                                                Click="OnOpenVersionModal">
+                                            <Button.IsEnabled>
+                                                <MultiBinding Converter="{StaticResource And}">
+                                                    <MultiBinding Converter="{StaticResource And}">
+                                                        <Binding Path="IsDisabled" Converter="{StaticResource Not}" />
+                                                        <Binding Path="Versions" Converter="{StaticResource HasItems}" />
+                                                    </MultiBinding>
+                                                    <MultiBinding Converter="{StaticResource ShowCustom}" ConverterParameter="invert">
+                                                        <Binding Path="InstalledVersion"/>
+                                                        <Binding Path="Versions"/>
+                                                    </MultiBinding>
+                                                </MultiBinding>
+                                            </Button.IsEnabled>
+                                        </Button>
+                                    </StackPanel>
+
+                                    <StackPanel Grid.Row="1" Grid.Column="1" Spacing="6">
+                                        <Button Classes="guid-pill"
+                                                IsVisible="{Binding Guid, Converter={StaticResource StringHasTextConverter}}"
+                                                Tag="{Binding Guid}"
+                                                ToolTip.Tip="Click to copy"
+                                                Click="OnCopyGuid">
+                                            <TextBlock Text="{Binding Guid, StringFormat=(\{0\})}" />
+                                        </Button>
+
+                                        <WrapPanel Orientation="Horizontal">
+                                            <Border Classes="pill" Padding="8,2" IsVisible="{Binding HasCategory}">
+                                                <TextBlock Text="{Binding Category}" />
+                                            </Border>
+                                            <ScrollViewer HorizontalScrollBarVisibility="Hidden"
+                                                          VerticalScrollBarVisibility="Disabled"
+                                                          PointerWheelChanged="OnAuthorsWheel"
+                                                          ClipToBounds="True">
+                                                <ItemsControl ItemsSource="{Binding Authors}" IsVisible="{Binding HasAuthors}">
+                                                    <ItemsControl.ItemsPanel>
+                                                        <ItemsPanelTemplate>
+                                                            <StackPanel Orientation="Horizontal" Spacing="6" />
+                                                        </ItemsPanelTemplate>
+                                                    </ItemsControl.ItemsPanel>
+                                                    <ItemsControl.ItemTemplate>
+                                                        <DataTemplate>
+                                                            <Button Classes="owner-pill" Padding="8,2"
+                                                                    Content="{Binding .}" Tag="{Binding .}" Click="OnAuthorClick" />
+                                                        </DataTemplate>
+                                                    </ItemsControl.ItemTemplate>
+                                                </ItemsControl>
+                                            </ScrollViewer>
+                                        </WrapPanel>
+
+                                        <Border Classes="pill" Padding="8,2" HorizontalAlignment="Left">
+                                            <Border.IsVisible>
+                                                <MultiBinding Converter="{StaticResource ShowCustom}">
+                                                    <Binding Path="InstalledVersion"/>
+                                                    <Binding Path="Versions"/>
+                                                </MultiBinding>
+                                            </Border.IsVisible>
+                                            <TextBlock Text="{ReflectionBinding Converter={StaticResource LocKey}, ConverterParameter=Installed.CustomInstall}" FontWeight="SemiBold"/>
+                                        </Border>
+                                        
+                                        <Border Classes="pill" Padding="8,2" HorizontalAlignment="Left">
+                                            <Border.IsVisible>
+                                                <MultiBinding Converter="{StaticResource ShowCustom}" ConverterParameter="invert">
+                                                    <Binding Path="InstalledVersion"/>
+                                                    <Binding Path="Versions"/>
+                                                </MultiBinding>
+                                            </Border.IsVisible>
+                                            <StackPanel Orientation="Horizontal" Spacing="6">
+                                                <TextBlock Text="{ReflectionBinding Converter={StaticResource LocKey}, ConverterParameter=Installed.Installed}" />
+                                                <TextBlock Text="{Binding InstalledVersion}" />
+                                                <TextBlock Text="•" />
+                                                <TextBlock Text="{ReflectionBinding Converter={StaticResource LocKey}, ConverterParameter=Installed.Files}" />
+                                                <TextBlock Text="{Binding FileCount}" />
+                                            </StackPanel>
+                                        </Border>
+                                        
+                                        <Border Classes="pill"
+                                                Padding="8,2"
+                                                HorizontalAlignment="Left"
+                                                IsVisible="{Binding FikaLabel, Converter={StaticResource StringHasTextConverter}}">
+                                            <TextBlock Text="{Binding FikaLabel}" />
+                                        </Border>
+
+                                        <Border Classes="pill" Padding="8,2" HorizontalAlignment="Left"
+                                                IsVisible="{Binding InstalledAtText, Converter={StaticResource StringHasTextConverter}}">
+                                            <StackPanel Orientation="Horizontal" Spacing="6">
+                                                <TextBlock Text="{ReflectionBinding Converter={StaticResource LocKey}, ConverterParameter=Installed.Installed}" />
+                                                <TextBlock Text="{Binding InstalledAtText}" />
+                                            </StackPanel>
+                                        </Border>
+
+                                        <Border Classes="pill" Padding="8,2" HorizontalAlignment="Left"
+                                                IsVisible="{Binding LatestPublishedText, Converter={StaticResource StringHasTextConverter}}">
+                                            <StackPanel Orientation="Horizontal" Spacing="6">
+                                                <TextBlock Text="{ReflectionBinding Converter={StaticResource LocKey}, ConverterParameter=Installed.LatestPublished}" />
+                                                <TextBlock Text="{Binding LatestPublishedText}" />
+                                            </StackPanel>
+                                        </Border>
+                                    </StackPanel>
+
+                                    <Grid Grid.Row="2" Grid.ColumnSpan="3" Grid.Column="0" ColumnDefinitions="*,Auto">
+                                        <WrapPanel Grid.Column="0" Orientation="Horizontal" Margin="0,5,0,0">
+                                            <Button Content="{ReflectionBinding Converter={StaticResource LocKey}, ConverterParameter=Installed.ListFiles}" Classes="btn btn-neutral" Margin="0,0,5,0" Tag="{Binding .}">
+                                                <Button.IsEnabled>
+                                                    <MultiBinding Converter="{StaticResource And}">
+                                                        <Binding Path="IsDisabled" Converter="{StaticResource Not}" />
+                                                        <MultiBinding Converter="{StaticResource ShowCustom}" ConverterParameter="invert">
+                                                            <Binding Path="InstalledVersion"/>
+                                                            <Binding Path="Versions"/>
+                                                        </MultiBinding>
+                                                    </MultiBinding>
+                                                </Button.IsEnabled>
+                                                </Button>
+                                            <Button Content="{ReflectionBinding Converter={StaticResource LocKey}, ConverterParameter=Installed.EditConfigs}"
+                                                    Classes="btn btn-neutral"
+                                                    Margin="0,0,5,0"
+                                                    Tag="{Binding .}"
+                                                    IsVisible="{Binding HasEditableConfigs}">
+                                                <Button.IsEnabled>
+                                                    <MultiBinding Converter="{StaticResource And}">
+                                                        <Binding Path="IsDisabled" Converter="{StaticResource Not}" />
+                                                        <MultiBinding Converter="{StaticResource ShowCustom}" ConverterParameter="invert">
+                                                            <Binding Path="InstalledVersion"/>
+                                                            <Binding Path="Versions"/>
+                                                        </MultiBinding>
+                                                    </MultiBinding>
+                                                </Button.IsEnabled>
+                                            </Button>
+
+                                            <ItemsControl ItemsSource="{Binding SourceButtons}" IsVisible="{Binding HasSources}">
+                                                <ItemsControl.ItemsPanel>
+                                                    <ItemsPanelTemplate>
+                                                        <StackPanel Orientation="Horizontal" Spacing="5">
+                                                            </StackPanel>
+                                                    </ItemsPanelTemplate>
+                                                </ItemsControl.ItemsPanel>
+                                                <ItemsControl.ItemTemplate>
+                                                    <DataTemplate>
+                                                        <Button Classes="btn btn-neutral" Content="{Binding Label}"
+                                                                Tag="{Binding Url}" Click="OnOpenSource" />
+                                                    </DataTemplate>
+                                                </ItemsControl.ItemTemplate>
+                                            </ItemsControl>
+                                        </WrapPanel>
+
+                                        <Button Grid.Column="1"
+                                                Classes="btn-trash"
+                                                Content="❌" FontSize="20" Margin="0,0,-7,-7"
+                                                HorizontalAlignment="Right" VerticalAlignment="Bottom"
+                                                ToolTip.Tip="{ReflectionBinding Converter={StaticResource LocKey}, ConverterParameter=Common.Uninstall}" Tag="{Binding .}">
+                                            <Button.IsVisible>
+                                                <MultiBinding Converter="{StaticResource ShowCustom}" ConverterParameter="invert">
+                                                    <Binding Path="InstalledVersion"/>
+                                                    <Binding Path="Versions"/>
+                                                </MultiBinding>
+                                            </Button.IsVisible>
+                                        </Button>
+                                    </Grid>
+                                    
+                                </Grid>
+
+                                <Border.ContextMenu>
+                                    <ContextMenu>
+                                        <MenuItem Header="{ReflectionBinding Converter={StaticResource LocKey}, ConverterParameter=Browse.OpenModPage}" Tag="{Binding DetailUrl}" Click="OnOpenPageFromContext" />
+                                        <MenuItem Header="{ReflectionBinding Converter={StaticResource LocKey}, ConverterParameter=Browse.CopyPageUrl}" Tag="{Binding DetailUrl}" Click="OnCopyLink" />
+                                        <MenuItem Header="{ReflectionBinding Converter={StaticResource LocKey}, ConverterParameter=Browse.CopyGuid}" Tag="{Binding Guid}" Click="OnCopyGuid" />
+                                        <MenuItem Header="{ReflectionBinding Converter={StaticResource LocKey}, ConverterParameter=Browse.OpenThumbnail}" Tag="{Binding Thumbnail}" Click="OnOpenThumb" />
+                                    </ContextMenu>
+                                </Border.ContextMenu>
+                            </Border>
+                        </DataTemplate>
+                    </ListBox.ItemTemplate>
+                </ListBox>
+            </ScrollViewer>
+
+            <StackPanel Grid.Row="2" x:Name="EmptyState"
+                        Spacing="8"
+                        HorizontalAlignment="Center"
+                        VerticalAlignment="Center"
+                        IsVisible="False">
+                <TextBlock Classes="h2" Text="{ReflectionBinding Converter={StaticResource LocKey}, ConverterParameter=Installed.Empty}" HorizontalAlignment="Center"/>
+                <TextBlock Opacity="0.85"
+                           Text="{ReflectionBinding Converter={StaticResource LocKey}, ConverterParameter=Installed.EmptyHint}"
+                           TextAlignment="Center"
+                           Margin="0,2,0,0"/>
+            </StackPanel>
+        </Grid>
+    </Grid>
+</UserControl>
