@@ -1,0 +1,87 @@
+<Window
+    xmlns="https://github.com/avaloniaui"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:v="clr-namespace:DragonDen.ModManager.Views"
+    x:Class="DragonDen.ModManager.Views.MainWindow"
+    Icon="/Assets/icon.ico"
+    Width="1280" Height="720"
+    MinWidth="1280" MinHeight="720"
+    SystemDecorations="BorderOnly"
+    SizeToContent="Manual"
+    ExtendClientAreaToDecorationsHint="True"
+    ExtendClientAreaChromeHints="NoChrome"
+    ShowInTaskbar="true"
+    CanResize="true"
+    Background="{DynamicResource SurfaceBrush}"
+    Title="Dragon Den Mod Manager - Community Edition v0.0.8.2C">
+
+    <Window.Resources>
+        <SolidColorBrush x:Key="Dd.Background" Color="#0F1317" />
+        <SolidColorBrush x:Key="Dd.Border" Color="#20262D" />
+        <SolidColorBrush x:Key="Dd.Blue" Color="#2e3890" />
+        <SolidColorBrush x:Key="Dd.LightGrey" Color="#777777" />
+
+        <SolidColorBrush x:Key="Dd.Transparent" Color="Transparent" />
+    </Window.Resources>
+
+    <Window.Styles>
+        <Style Selector="Button#KoFiBtn:pointerover TextBlock">
+            <Setter Property="TextDecorations" Value="Underline" />
+        </Style>
+        <Style Selector="Button.KoFiBtn:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+            <Setter Property="Background" Value="{StaticResource Dd.Transparent}" />
+        </Style>
+        <Style Selector="TextBlock.KoFiBtnText:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+            <Setter Property="Foreground" Value="{StaticResource Dd.Blue}" />
+        </Style>
+
+        <Style Selector="Button">
+            <Setter Property="Background" Value="{DynamicResource Dd.Transparent}" />
+            <Setter Property="Cursor" Value="Hand" />
+        </Style>
+
+        <Style Selector="Button:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+            <Setter Property="Background" Value="{DynamicResource Dd.Transparent}" />
+        </Style>
+    </Window.Styles>
+
+    <Grid RowDefinitions="Auto,*,Auto" Background="{StaticResource Dd.Background}">
+        <v:TitleBar />
+
+        <Border Grid.Row="1" Padding="12" BorderBrush="{StaticResource Dd.Border}" BorderThickness="0">
+            <TabControl>
+                <TabItem x:Name="TabBrowse" Header="Browse Mods">
+                    <v:BrowseModsPage />
+                </TabItem>
+                <TabItem x:Name="TabInstalled" Header="Installed Mods">
+                    <v:InstalledModsPage />
+                </TabItem>
+                <TabItem x:Name="TabCollections" Header="Collections">
+                    <v:CollectionsPage />
+                </TabItem>
+                <TabItem x:Name="TabCollectionsProfiles" Header="Collections Profiles">
+                    <v:CollectionsProfilesPage />
+                </TabItem>
+                <TabItem x:Name="TabSettings" Header="Settings">
+                    <v:SettingsPage x:Name="SettingsTabContent" />
+                </TabItem>
+            </TabControl>
+        </Border>
+
+        <Border Grid.Row="0" Grid.RowSpan="2" HorizontalAlignment="Right" VerticalAlignment="Bottom" Margin="0,0,12,40" Background="Transparent">
+            <ItemsControl x:Name="ToastHost" />
+        </Border>
+
+        <Border Grid.Row="2" BorderBrush="{StaticResource Dd.Border}" BorderThickness="1,1,0,0" Padding="6,3">
+            <Grid>
+                <TextBlock x:Name="FooterLeft" HorizontalAlignment="Left" Padding="10,3,0,0" Foreground="{StaticResource Dd.LightGrey}" />
+                <TextBlock x:Name="FooterCenter" HorizontalAlignment="Left" Padding="0,3,0,0" Foreground="{StaticResource Dd.LightGrey}"
+                           Cursor="Hand" PointerPressed="OnFooterCenterClick" />
+                <Button x:Name="KoFiBtn" Click="OnOpenKoFi" HorizontalAlignment="Right" Padding="0,3,10,0" Background="Transparent" BorderBrush="Transparent"
+                        Cursor="Hand">
+                    <TextBlock x:Name="KoFiBtnText" Text="Support me on Ko-fi" Foreground="#FF7A1A" />
+                </Button>
+            </Grid>
+        </Border>
+    </Grid>
+</Window>
